@@ -6,23 +6,23 @@ import "./JokeList.css";
 function JokeList({ numJokesToGet = 5 }) {
   const [jokes, setJokes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  /* get jokes if there are no jokes */
 
-  useEffect(function () {
+  useEffect(() => {
     async function getJokes() {
-      let j = [...jokes];
+      let j = [];
       let seenJokes = new Set();
       try {
         while (j.length < numJokesToGet) {
           let res = await axios.get("https://icanhazdadjoke.com", {
             headers: { Accept: "application/json" }
           });
-          let { ...jokeObj } = res.data;
+          let { joke, id } = res.data;
 
-          if (!seenJokes.has(jokeObj.id)) {
-            seenJokes.add(jokeObj.id);
-            j.push({ ...jokeObj, votes: 0 });
+          if (!seenJokes.has(id)) {
+            seenJokes.add(id);
+            j.push({ joke, id, votes: 0 });
           } else {
             console.error("duplicate found!");
           }
@@ -31,6 +31,8 @@ function JokeList({ numJokesToGet = 5 }) {
         setIsLoading(false)
       } catch (err) {
         console.error(err);
+        setError('Error getting joke');
+        setIsLoading(false);
       }
     }
 
@@ -42,13 +44,16 @@ function JokeList({ numJokesToGet = 5 }) {
   function generateNewJokes() {
     setJokes([]);
     setIsLoading(true);
+    setError(null);
   }
 
   /* change vote for this id by delta (+1 or -1) */
 
   function vote(id, delta) {
-    setJokes(allJokes =>
-      allJokes.map(j => (j.id === id ? { ...j, votes: j.votes + delta } : j))
+    setJokes((allJokes) =>
+      allJokes.map((j) => 
+      j.id === id ? { ...j, votes: j.votes + delta } : j
+      )
     );
   }
 
@@ -66,6 +71,7 @@ function JokeList({ numJokesToGet = 5 }) {
 
   return (
     <div className="JokeList">
+    {error && <div className="error">{error}</div>}
       <button className="JokeList-getmore" onClick={generateNewJokes}>
         Get New Jokes
         </button>
