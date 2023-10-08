@@ -1,9 +1,14 @@
 import React from "react";
 import "./Joke.css";
 
-function Joke([ vote, votes, text, id ]) {
-    function upVote(evt) { vote(id, +1); }
-    function downVote(evt) { vote(id, -1); }
+function Joke(props) {
+    const { vote, votes, text, id } = props;
+    function upVote() {
+        vote(id, +1);
+    }
+    function downVote() {
+        vote(id, -1); 
+    }
 
     return (
         <div className="Joke">
